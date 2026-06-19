@@ -165,7 +165,7 @@
     hbp.Q.value = 0.8;
     const hg = ctx.createGain();
     hg.gain.setValueAtTime(0.0001, hissStart);
-    hg.gain.exponentialRampToValueAtTime(0.0105, hissStart + 0.03);   // soft burst
+    hg.gain.exponentialRampToValueAtTime(0.00525, hissStart + 0.03);   // soft burst
     // smooth, natural fade-out for the rest of the hiss
     hg.gain.setTargetAtTime(0.0001, hissStart + 0.06, dur * 0.32);
     noise.connect(hbp).connect(hg).connect(ctx.destination);
