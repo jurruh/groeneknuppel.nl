@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plop</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    background: radial-gradient(circle at 50% 30%, #1b3d24 0%, #0a1c11 70%, #06120a 100%);
+    overflow: hidden;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+  }
+  .hint {
+    margin: 0;
+    color: #e9f3ea;
+    opacity: .7;
+    font-size: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  #stage {
+    cursor: pointer;
+    filter: drop-shadow(0 26px 34px rgba(0,0,0,.55));
+    transition: transform .08s ease;
+  }
+  #stage:active { transform: scale(.99); }
+  .bottle { transform-origin: 50% 65%; }
+  .pop-anim { animation: pop .4s ease; }
+  @keyframes pop {
+    0%{transform:translateY(0) rotate(0)} 28%{transform:translateY(-16px) rotate(-1.5deg)}
+    60%{transform:translateY(5px) rotate(.8deg)} 100%{transform:translateY(0) rotate(0)}
+  }
+  .swing { transform-origin: 150px 95px; }
+  .cap-open { animation: capOpen .42s ease; }
+  @keyframes capOpen {
+    0%{transform:translateY(0) rotate(0)} 42%{transform:translateY(-26px) rotate(-16deg)}
+    100%{transform:translateY(0) rotate(0)}
+  }
+</style>
+</head>
+<body>
+  <svg id="stage" width="280" height="540" viewBox="0 0 300 580" xmlns="http://www.w3.org/2000/svg" aria-label="beer bottle">
+    <defs>
+      <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="#0c3617"/>
+        <stop offset="0.16" stop-color="#3f9a4e"/>
+        <stop offset="0.36" stop-color="#69c46f"/>
+        <stop offset="0.55" stop-color="#2f8a3c"/>
+        <stop offset="0.78" stop-color="#114a1e"/>
+        <stop offset="1"    stop-color="#05220d"/>
+      </linearGradient>
+      <linearGradient id="porcelain" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#deddd6"/>
+        <stop offset="0.45" stop-color="#ffffff"/>
+        <stop offset="1" stop-color="#bcbbb4"/>
+      </linearGradient>
+      <linearGradient id="wire" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f2f2f4"/>
+        <stop offset="0.5" stop-color="#b9b9bf"/>
+        <stop offset="1" stop-color="#7c7c82"/>
+      </linearGradient>
+    </defs>
+
+    <g class="bottle" id="bottle">
+      <!-- body -->
+      <path d="M120 150
+               C120 185 95 205 92 265
+               L88 470
+               C87 515 112 540 150 540
+               C188 540 213 515 212 470
+               L208 265
+               C205 205 180 185 180 150 Z"
+            fill="url(#glass)" stroke="#05220d" stroke-width="3"/>
+      <!-- neck -->
+      <path d="M120 150 L120 100 C120 90 132 86 150 86 C168 86 180 90 180 100 L180 150 Z"
+            fill="url(#glass)" stroke="#05220d" stroke-width="3"/>
+      <!-- highlight -->
+      <path d="M108 200 C100 270 102 410 108 470 C112 498 118 518 128 528
+               C120 500 116 410 117 310 C118 265 122 230 130 208 Z"
+            fill="#ffffff" opacity="0.45"/>
+
+      <!-- swing-top -->
+      <g class="swing" id="swing">
+        <g fill="none" stroke="url(#wire)" stroke-width="6" stroke-linecap="round">
+          <path d="M126 145 C120 118 120 100 130 88"/>
+          <path d="M174 145 C180 118 180 100 170 88"/>
+          <path d="M130 88 C138 74 162 74 170 88"/>
+          <path d="M120 128 L180 128"/>
+        </g>
+        <ellipse cx="150" cy="86" rx="22" ry="8" fill="#cf2f24" stroke="#9c1f17" stroke-width="2"/>
+        <path d="M130 68 C130 54 170 54 170 68 L170 82 C170 92 130 92 130 82 Z"
+              fill="url(#porcelain)" stroke="#a9a8a1" stroke-width="2"/>
+        <ellipse cx="150" cy="66" rx="20" ry="7" fill="#ffffff" stroke="#cfcec7" stroke-width="1.5"/>
+      </g>
+    </g>
+  </svg>
+
+  <p class="hint">Click the bottle</p>
+
+<script>
+  const stage  = document.getElementById('stage');
+  const bottle = document.getElementById('bottle');
+  const swing  = document.getElementById('swing');
+
+  let audioCtx;
+  function ensureCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  // Synthesized "cheek pop" — low, round, hollow and very short.
+  function playPlop() {
+    const ctx = ensureCtx();
+    const t = ctx.currentTime;
+
+    // Main pop body: fast drop from a mid pitch down to a low thud,
+    // through a resonant lowpass to give it that hollow mouth-cavity tone.
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(1300, t);
+    lp.frequency.exponentialRampToValueAtTime(320, t + 0.07);
+    lp.Q.value = 10;                      // resonance = "hollow" character
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(680, t);
+    osc.frequency.exponentialRampToValueAtTime(140, t + 0.06);
+    oscGain.gain.setValueAtTime(0.0001, t);
+    oscGain.gain.exponentialRampToValueAtTime(1.0, t + 0.004);
+    oscGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+    osc.connect(lp).connect(oscGain).connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.13);
+
+    // Tiny click transient at the very onset (the "snap" of the release).
+    const click = ctx.createOscillator();
+    const cg = ctx.createGain();
+    click.type = 'triangle';
+    click.frequency.setValueAtTime(1400, t);
+    click.frequency.exponentialRampToValueAtTime(300, t + 0.012);
+    cg.gain.setValueAtTime(0.5, t);
+    cg.gain.exponentialRampToValueAtTime(0.0001, t + 0.02);
+    click.connect(cg).connect(ctx.destination);
+    click.start(t); click.stop(t + 0.025);
+  }
+
+  // Clean up the class as soon as each animation finishes so it can replay.
+  bottle.addEventListener('animationend', () => bottle.classList.remove('pop-anim'));
+  swing.addEventListener('animationend', () => swing.classList.remove('cap-open'));
+
+  function pop() {
+    playPlop();
+    bottle.classList.remove('pop-anim');
+    swing.classList.remove('cap-open');
+    // Force reflow on BOTH elements so the animations restart from scratch.
+    void bottle.offsetWidth;
+    void swing.getBoundingClientRect().width;
+    bottle.classList.add('pop-anim');
+    swing.classList.add('cap-open');
+  }
+
+  stage.addEventListener('click', pop);
+</script>
+</body>
+</html>
