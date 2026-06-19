@@ -165,10 +165,9 @@
     hbp.Q.value = 0.8;
     const hg = ctx.createGain();
     hg.gain.setValueAtTime(0.0001, hissStart);
-    hg.gain.exponentialRampToValueAtTime(0.18, hissStart + 0.025);        // quick burst
-    hg.gain.setValueAtTime(0.18, hissStart + 0.025);
-    hg.gain.exponentialRampToValueAtTime(0.06, hissStart + dur * 0.5);    // sustained escape
-    hg.gain.exponentialRampToValueAtTime(0.0001, hissStart + dur);        // long bleed-off
+    hg.gain.exponentialRampToValueAtTime(0.06, hissStart + 0.03);   // soft burst
+    // smooth, natural fade-out for the rest of the hiss
+    hg.gain.setTargetAtTime(0.0001, hissStart + 0.06, dur * 0.32);
     noise.connect(hbp).connect(hg).connect(ctx.destination);
     noise.start(hissStart);
   }
