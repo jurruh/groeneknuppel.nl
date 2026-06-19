@@ -118,6 +118,14 @@
 
   const rnd = (a, b) => a + Math.random() * (b - a);
 
+  // iOS speakers over-emphasize the high-frequency hiss, so tame it on iPhone/iPad.
+  const isIOS = /iP(hone|ad|od)/.test(navigator.platform) ||
+    (/Mac/.test(navigator.platform) && navigator.maxTouchPoints > 1) ||
+    /iPhone|iPad|iPod/.test(navigator.userAgent);
+  const hissPeak = isIOS ? 0.0026 : 0.00525;   // ~half as loud on iOS
+  const hissHi   = isIOS ? 3000 : 5500;        // start lower so it's not in the phone's "hot" band
+  const hissLo   = isIOS ? 1400 : 2600;
+
   // Realistic beer-bottle open: a hollow "pock" of the cap releasing,
   // immediately followed by the pressurized CO2 "pssht" hiss.
   function playPlop() {
@@ -160,12 +168,12 @@
 
     const hbp = ctx.createBiquadFilter();
     hbp.type = 'bandpass';
-    hbp.frequency.setValueAtTime(5500, hissStart);
-    hbp.frequency.exponentialRampToValueAtTime(2600, hissStart + dur);
+    hbp.frequency.setValueAtTime(hissHi, hissStart);
+    hbp.frequency.exponentialRampToValueAtTime(hissLo, hissStart + dur);
     hbp.Q.value = 0.8;
     const hg = ctx.createGain();
     hg.gain.setValueAtTime(0.0001, hissStart);
-    hg.gain.exponentialRampToValueAtTime(0.00525, hissStart + 0.03);   // soft burst
+    hg.gain.exponentialRampToValueAtTime(hissPeak, hissStart + 0.03);   // soft burst
     // smooth, natural fade-out for the rest of the hiss
     hg.gain.setTargetAtTime(0.0001, hissStart + 0.06, dur * 0.32);
     noise.connect(hbp).connect(hg).connect(ctx.destination);
