@@ -331,13 +331,16 @@
 
   const beer = document.getElementById('beer');
   let isDrinking = false;
+  let cooldownUntil = 0;   // nieuw drankje pas 8s na 't vorige
 
   // Animation (3s) hits these moments to "swallow" each gulp — match the keyframe %.
   const gulpTimes = [0.24, 0.60, 0.96, 1.32, 1.74];
 
   beer.addEventListener('animationend', () => {
     beer.classList.remove('filling');
+    beer.querySelectorAll('.bubble').forEach(b => b.remove());   // koolzuur opruimen
     isDrinking = false;
+    cooldownUntil = Date.now() + 8000;   // start cooldown van 8 seconden
   });
 
   function fillBeer() {
@@ -367,8 +370,8 @@
 
   function pop() {
     playPlop();
-    // willekeurig, en alleen als 't vorige glas op is
-    if (!isDrinking && Math.random() < 0.15) fillBeer();
+    // willekeurig, alleen als 't vorige glas op is én de 8s cooldown voorbij is
+    if (!isDrinking && Date.now() >= cooldownUntil && Math.random() < 0.15) fillBeer();
     count++;
     countEl.textContent = count;
     localStorage.setItem('ploppedCount', count);
