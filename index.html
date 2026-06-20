@@ -326,6 +326,23 @@
     click.connect(cg).connect(ctx.destination);
     click.start(t); click.stop(t + 0.015);
 
+    // --- 1b) The "kling": swing-top tapping the glass (bright, glassy ring) ---
+    const partials = [2350, 3700, 5200];   // inharmonic = glassy
+    [t + 0.07].forEach(klingTime => {     // één kling
+      partials.forEach((f, i) => {
+        const k = ctx.createOscillator();
+        const kg = ctx.createGain();
+        k.type = 'sine';
+        k.frequency.setValueAtTime(f * rnd(0.97, 1.03), klingTime);
+        const amp = 0.042 / (i + 1);
+        kg.gain.setValueAtTime(0.0001, klingTime);
+        kg.gain.exponentialRampToValueAtTime(amp, klingTime + 0.004);
+        kg.gain.exponentialRampToValueAtTime(0.0001, klingTime + 0.18 - i * 0.04);
+        k.connect(kg).connect(ctx.destination);
+        k.start(klingTime); k.stop(klingTime + 0.2);
+      });
+    });
+
     // --- 2) The "pssht": pressurized gas escaping ---
     const hissStart = t + 0.02;
     const dur = rnd(0.6, 0.85);
