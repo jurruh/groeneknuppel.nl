@@ -50,6 +50,60 @@
     font-size: 34px;
   }
 
+  /* Age gate */
+  .agegate {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(6, 18, 10, .92);
+    backdrop-filter: blur(4px);
+  }
+  .agegate.hidden { display: none; }
+  .agegate-card {
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    color: #e9f3ea;
+    background: linear-gradient(160deg, #14361f 0%, #0a1c11 100%);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 18px;
+    padding: 34px 28px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.55);
+  }
+  .agegate-card h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+  }
+  .agegate-card p {
+    margin: 0 0 26px;
+    opacity: .75;
+    font-size: 15px;
+  }
+  .agegate-buttons {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+  }
+  .agegate-buttons button,
+  .agegate-buttons a {
+    flex: 1;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 999px;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #fff;
+  }
+  .btn-yes { background: linear-gradient(135deg, #43c25a, #1f8a3c); }
+  .btn-no  { background: linear-gradient(135deg, #f7b733, #c8302b); }
+
   /* Beer fill overlay */
   .beer-overlay {
     position: fixed;
@@ -99,6 +153,13 @@
       linear-gradient(180deg, #fff 0%, #fdf6e3 100%);
     background-repeat: no-repeat;
     opacity: .75;
+  }
+  /* clips the bubbles to the current liquid level so the carbonation
+     stays inside the beer and sinks along with it */
+  .beer-inner {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
   }
   /* rising bubbles inside the beer */
   .bubble {
@@ -190,12 +251,24 @@
     </g>
   </svg>
 
+  <div class="agegate" id="agegate">
+    <div class="agegate-card">
+      <h2>Ben je 18 jaar of ouder?</h2>
+      <p>Deze site bevat bier. Je moet 18 jaar of ouder zijn om verder te gaan.</p>
+      <div class="agegate-buttons">
+        <button class="btn-yes" id="ageYes">Joa</button>
+        <a class="btn-no" href="https://www.youtube.com/watch?v=Q-doz_a8HTA">Nee</a>
+      </div>
+    </div>
+  </div>
+
   <p class="hint">Klikken - Vaak Bu'j te Bang</p>
   <p class="counter">Geplopt: <span id="count">0</span></p>
 
   <div class="beer-overlay">
     <div class="beer" id="beer">
       <div class="foam"></div>
+      <div class="beer-inner" id="beerInner"></div>
     </div>
   </div>
 
@@ -330,6 +403,7 @@
   let lastSpreuk = -1;
 
   const beer = document.getElementById('beer');
+  const beerInner = document.getElementById('beerInner');
   let isDrinking = false;
   let cooldownUntil = 0;   // nieuw drankje pas 8s na 't vorige
 
@@ -338,7 +412,7 @@
 
   beer.addEventListener('animationend', () => {
     beer.classList.remove('filling');
-    beer.querySelectorAll('.bubble').forEach(b => b.remove());   // koolzuur opruimen
+    beerInner.querySelectorAll('.bubble').forEach(b => b.remove());   // koolzuur opruimen
     isDrinking = false;
     cooldownUntil = Date.now() + 8000;   // start cooldown van 8 seconden
   });
@@ -348,7 +422,7 @@
     isDrinking = true;
 
     // add a few rising bubbles
-    beer.querySelectorAll('.bubble').forEach(b => b.remove());
+    beerInner.querySelectorAll('.bubble').forEach(b => b.remove());
     for (let i = 0; i < 14; i++) {
       const b = document.createElement('div');
       b.className = 'bubble';
@@ -358,7 +432,7 @@
       b.style.left = Math.random() * 100 + '%';
       b.style.animationDuration = (1.2 + Math.random() * 1.2) + 's';
       b.style.animationDelay = (Math.random() * 0.6) + 's';
-      beer.appendChild(b);
+      beerInner.appendChild(b);
     }
     beer.classList.remove('filling');
     void beer.offsetWidth;
@@ -392,6 +466,11 @@
   }
 
   stage.addEventListener('click', pop);
+
+  // Leeftijdscheck
+  document.getElementById('ageYes').addEventListener('click', () => {
+    document.getElementById('agegate').classList.add('hidden');
+  });
 </script>
 </body>
 </html>
