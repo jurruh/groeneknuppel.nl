@@ -24,6 +24,30 @@
     font-size: 15px;
     letter-spacing: 2px;
     text-transform: uppercase;
+    text-align: center;
+    max-width: min(90vw, 520px);
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+  .counter {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    margin: 0;
+    padding: 14px 26px;
+    border-radius: 999px;
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #f7b733 0%, #e34a3a 50%, #c8302b 100%);
+    box-shadow: 0 8px 22px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.4);
+    border: 2px solid rgba(255,255,255,.25);
+    z-index: 10;
+  }
+  .counter span {
+    color: #fff;
+    font-size: 34px;
   }
   #stage {
     cursor: pointer;
@@ -103,6 +127,7 @@
   </svg>
 
   <p class="hint">Klikken - Vaak Bu'j te Bang</p>
+  <p class="counter">Geplopt: <span id="count">0</span></p>
 
 <script>
   const stage  = document.getElementById('stage');
@@ -184,8 +209,50 @@
   bottle.addEventListener('animationend', () => bottle.classList.remove('pop-anim'));
   swing.addEventListener('animationend', () => swing.classList.remove('cap-open'));
 
+  const countEl = document.getElementById('count');
+  const hintEl = document.querySelector('.hint');
+  let count = parseInt(localStorage.getItem('ploppedCount'), 10) || 0;
+  countEl.textContent = count;   // toon opgeslagen waarde bij laden
+
+  // Achterhoekse spreuken — bij elke klik verschijnt er een andere.
+  const spreuken = [
+    "A'j plat kunt proaten, mo'j 't neet loaten",
+    "Hold oe kreggel",
+    "Wee niet sterk is, mot slim wèzen",
+    "Doe maor gewoon, dan doe i'j al gek genog",
+    "Now breck mien klomp",
+    "Bu'j now helemoal van de pad?",
+    "Doar he'j de poppen an't dansen",
+    "Iej könt nich teggen de wind in pissen",
+    "Better good gepikt as slecht eneajd",
+    "Joa joa...",
+    "'t löp wal los",
+    "Wi'j gaot lekker høken",
+    "As 't neet geet zoals 't mut, dan mut 't mar neet zoals 't geet",
+    "Aj' de tied hebt, mo'j de tied nemmen",
+    "Wi'j kunt 't neet allene doon",
+    "Nae a'j de klokke heurt, mut 't peerd mennen",
+    "Deur 't veurgoonde mot 't varken",
+    "Jao's is ook jao, mao nee is nee",
+    "Ie kunt de kat oet de boom kieken",
+    "Nae vragt, kom iej neet wies",
+    "Ie könt het merken an de tied",
+    "As de daakpanne gaot glimmen, gaot de boer flink timmen",
+  ];
+  let lastSpreuk = -1;
+
   function pop() {
     playPlop();
+    count++;
+    countEl.textContent = count;
+    localStorage.setItem('ploppedCount', count);
+
+    // kies een andere spreuk dan de vorige
+    let i;
+    do { i = Math.floor(Math.random() * spreuken.length); }
+    while (spreuken.length > 1 && i === lastSpreuk);
+    lastSpreuk = i;
+    hintEl.textContent = spreuken[i];
     bottle.classList.remove('pop-anim');
     swing.classList.remove('cap-open');
     // Force reflow on BOTH elements so the animations restart from scratch.
