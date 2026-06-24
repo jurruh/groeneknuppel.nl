@@ -104,6 +104,27 @@
   .btn-yes { background: linear-gradient(135deg, #43c25a, #1f8a3c); }
   .btn-no  { background: linear-gradient(135deg, #f7b733, #c8302b); }
 
+  /* Confetti */
+  .confetti-layer {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 50;
+  }
+  .confetti {
+    position: absolute;
+    top: -20px;
+    width: 10px;
+    height: 14px;
+    will-change: transform, opacity;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotateZ(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotateZ(720deg); opacity: 1; }
+  }
+
   /* Beer fill overlay */
   .beer-overlay {
     position: fixed;
@@ -264,6 +285,8 @@
 
   <p class="hint">Klikken - Vaak Bu'j te Bang</p>
   <p class="counter">Geplopt: <span id="count">0</span></p>
+
+  <div class="confetti-layer" id="confettiLayer"></div>
 
   <div class="beer-overlay">
     <div class="beer" id="beer">
@@ -460,6 +483,27 @@
     gulpTimes.forEach(s => glug(s));
   }
 
+  const confettiLayer = document.getElementById('confettiLayer');
+  const confettiColors = ['#f7b733', '#e34a3a', '#43c25a', '#3fa9f5', '#c8302b', '#ffd34d', '#9b5de5'];
+
+  function fireConfetti() {
+    for (let i = 0; i < 90; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+      const dur = 2 + Math.random() * 1.8;
+      c.style.animationDuration = dur + 's';
+      c.style.animationDelay = (Math.random() * 0.4) + 's';
+      const w = 6 + Math.random() * 8;
+      c.style.width = w + 'px';
+      c.style.height = (w * (0.6 + Math.random())) + 'px';
+      if (Math.random() < 0.5) c.style.borderRadius = '50%';
+      confettiLayer.appendChild(c);
+      c.addEventListener('animationend', () => c.remove());
+    }
+  }
+
   function pop() {
     playPlop();
     // willekeurig, alleen als 't vorige glas op is én de 8s cooldown voorbij is
@@ -467,6 +511,7 @@
     count++;
     countEl.textContent = count;
     localStorage.setItem('ploppedCount', count);
+    if (count % 16 === 0) fireConfetti();   // feest elke 16 flesjes
 
     // kies een andere spreuk dan de vorige
     let i;
