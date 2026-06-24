@@ -49,6 +49,22 @@
     color: #fff;
     font-size: 34px;
   }
+  .crates {
+    position: fixed;
+    top: 100px;
+    right: 22px;
+    margin: 0;
+    padding: 7px 16px;
+    border-radius: 999px;
+    color: #e9f3ea;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.2);
+    z-index: 10;
+  }
+  .crates span { color: #69c46f; }
 
   /* Age gate */
   .agegate {
@@ -285,6 +301,7 @@
 
   <p class="hint">Klikken - Vaak Bu'j te Bang</p>
   <p class="counter">Geplopt: <span id="count">0</span></p>
+  <p class="crates">Kratten: <span id="crates">0</span></p>
 
   <div class="confetti-layer" id="confettiLayer"></div>
 
@@ -412,8 +429,10 @@
 
   const countEl = document.getElementById('count');
   const hintEl = document.querySelector('.hint');
+  const cratesEl = document.getElementById('crates');
   let count = parseInt(localStorage.getItem('ploppedCount'), 10) || 0;
-  countEl.textContent = count;   // toon opgeslagen waarde bij laden
+  countEl.textContent = count;                       // toon opgeslagen waarde bij laden
+  cratesEl.textContent = Math.floor(count / 16);     // 1 kratje = 16 flesjes
 
   // Achterhoekse spreuken — bij elke klik verschijnt er een andere.
   const spreuken = [
@@ -510,6 +529,7 @@
     if (!isDrinking && Date.now() >= cooldownUntil && Math.random() < 0.15) fillBeer();
     count++;
     countEl.textContent = count;
+    cratesEl.textContent = Math.floor(count / 16);
     localStorage.setItem('ploppedCount', count);
     if (count % 16 === 0) fireConfetti();   // feest elke 16 flesjes
 
