@@ -85,9 +85,9 @@
   /* Mini frikandel */
   .frikandel {
     position: fixed;
-    width: 96px;
-    height: 30px;
-    border-radius: 15px;
+    width: 130px;
+    height: 42px;
+    border-radius: 21px;
     cursor: pointer;
     z-index: 20;
     left: 0;
@@ -639,7 +639,7 @@
     snack.style.animation = 'none';
     void snack.offsetWidth;
     snack.style.animation = '';
-    snack.style.animationDuration = (3 + Math.random() * 2) + 's';
+    snack.style.animationDuration = (6 + Math.random() * 2.5) + 's';   // rustiger = makkelijker raken
   }
 
   function eatSnack(e) {
@@ -672,7 +672,7 @@
   function pop() {
     playPlop();
     // af en toe rolt er een hapje in beeld
-    if (Math.random() < 0.18) showSnack();
+    if (Math.random() < 0.28) showSnack();
     // willekeurig, alleen als 't vorige glas op is én de 8s cooldown voorbij is
     if (!isDrinking && Date.now() >= cooldownUntil && Math.random() < 0.15) fillBeer();
     count++;
