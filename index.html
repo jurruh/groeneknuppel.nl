@@ -82,34 +82,29 @@
   }
   .bb-counter span { color: #d9a441; }
 
-  /* Bitterbal */
-  .bitterbal {
+  /* Mini frikandel */
+  .frikandel {
     position: fixed;
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
+    width: 96px;
+    height: 30px;
+    border-radius: 15px;
     cursor: pointer;
     z-index: 20;
-    background:
-      radial-gradient(circle at 22% 20%, rgba(255,220,160,.9) 0 4px, transparent 5px),
-      radial-gradient(circle at 60% 30%, rgba(90,55,20,.8) 0 3px, transparent 4px),
-      radial-gradient(circle at 40% 55%, rgba(255,220,160,.7) 0 3px, transparent 4px),
-      radial-gradient(circle at 72% 62%, rgba(90,55,20,.8) 0 4px, transparent 5px),
-      radial-gradient(circle at 30% 78%, rgba(255,220,160,.7) 0 3px, transparent 4px),
-      radial-gradient(circle at 80% 80%, rgba(90,55,20,.7) 0 3px, transparent 4px),
-      radial-gradient(circle at 35% 32%, #c08440, #8a5320 62%, #5c3712 100%);
-    box-shadow:
-      inset -6px -8px 14px rgba(0,0,0,.45),
-      inset 5px 6px 12px rgba(255,210,150,.35),
-      0 10px 18px rgba(0,0,0,.45);
     left: 0;
-    animation: bbRoll linear forwards;
+    background:
+      radial-gradient(ellipse at 30% 30%, rgba(255,200,150,.35) 0 12px, transparent 22px),
+      linear-gradient(180deg, #7a4e26 0%, #5a371a 45%, #3f2611 100%);
+    box-shadow:
+      inset -4px -6px 10px rgba(0,0,0,.5),
+      inset 4px 5px 10px rgba(255,200,150,.25),
+      0 8px 16px rgba(0,0,0,.45);
+    animation: frikRoll linear forwards;
   }
-  .bitterbal.hidden { display: none; }
-  /* rollen van links naar rechts over het scherm */
-  @keyframes bbRoll {
-    from { transform: translateX(-90px) rotate(0deg); }
-    to   { transform: translateX(100vw) rotate(1440deg); }
+  .frikandel.hidden { display: none; }
+  /* tuimelt over 't scherm */
+  @keyframes frikRoll {
+    from { transform: translateX(-110px) rotate(0deg); }
+    to   { transform: translateX(100vw) rotate(1080deg); }
   }
 
   /* Mosterd-spat */
@@ -365,9 +360,9 @@
   <p class="hint">Klikken - Vaak Bu'j te Bang</p>
   <p class="counter">Geplopt: <span id="count">0</span></p>
   <p class="crates">Kratten: <span id="crates">0</span></p>
-  <p class="bb-counter">Bitterballen: <span id="bbcount">0</span></p>
+  <p class="bb-counter">Bruin fruit: <span id="bbcount">0</span></p>
 
-  <div class="bitterbal hidden" id="bitterbal" title="Hap!"></div>
+  <div class="frikandel hidden" id="frikandel" title="Hap!"></div>
 
   <div class="confetti-layer" id="confettiLayer"></div>
 
@@ -623,34 +618,38 @@
     }
   }
 
-  // ---- Bitterbal ----
-  const bitterbal = document.getElementById('bitterbal');
+  // ---- Bruin fruit (bitterbal + mini frikandel) ----
   const bbCountEl = document.getElementById('bbcount');
-  let bbCount = parseInt(localStorage.getItem('bitterballenCount'), 10) || 0;
+  let bbCount = parseInt(localStorage.getItem('bruinFruitCount'), 10) || 0;
   bbCountEl.textContent = bbCount;
-  function showBitterbal() {
-    if (!bitterbal.classList.contains('hidden')) return;   // er rolt er al een
-    // willekeurige hoogte, vermijd de tellers bovenin
-    const y = 30 + Math.random() * 48;   // 30–78 vh
-    bitterbal.style.top = y + 'vh';
-    bitterbal.classList.remove('hidden');
-    // opnieuw triggeren, daarna de rol-duur (3–5s) zetten
-    bitterbal.style.animation = 'none';
-    void bitterbal.offsetWidth;
-    bitterbal.style.animation = '';
-    bitterbal.style.animationDuration = (3 + Math.random() * 2) + 's';
+
+  const snacks = [
+    document.getElementById('frikandel'),
+  ];
+
+  function showSnack() {
+    // kies een snack die nog niet in beeld rolt
+    const free = snacks.filter(s => s.classList.contains('hidden'));
+    if (!free.length) return;
+    const snack = free[Math.floor(Math.random() * free.length)];
+    const y = 30 + Math.random() * 48;   // 30–78 vh, onder de tellers
+    snack.style.top = y + 'vh';
+    snack.classList.remove('hidden');
+    // rol-animatie opnieuw triggeren, daarna duur (3–5s) zetten
+    snack.style.animation = 'none';
+    void snack.offsetWidth;
+    snack.style.animation = '';
+    snack.style.animationDuration = (3 + Math.random() * 2) + 's';
   }
 
-  // rolt eraf zonder opgegeten te worden → opruimen
-  bitterbal.addEventListener('animationend', () => bitterbal.classList.add('hidden'));
-
-  function eatBitterbal(e) {
+  function eatSnack(e) {
+    const snack = e.currentTarget;
     e.stopPropagation();
-    if (bitterbal.classList.contains('hidden')) return;
+    if (snack.classList.contains('hidden')) return;
     playCrunch();
 
-    // mosterd-spat op de plek van de bitterbal
-    const r = bitterbal.getBoundingClientRect();
+    // mosterd-spat op de plek van de snack
+    const r = snack.getBoundingClientRect();
     const m = document.createElement('div');
     m.className = 'mustard';
     m.style.left = (r.left + r.width / 2 - 43) + 'px';
@@ -658,17 +657,22 @@
     document.body.appendChild(m);
     m.addEventListener('animationend', () => m.remove());
 
-    bitterbal.classList.add('hidden');
+    snack.classList.add('hidden');
     bbCount++;
     bbCountEl.textContent = bbCount;
-    localStorage.setItem('bitterballenCount', bbCount);
+    localStorage.setItem('bruinFruitCount', bbCount);
   }
-  bitterbal.addEventListener('click', eatBitterbal);
+
+  snacks.forEach(s => {
+    s.addEventListener('click', eatSnack);
+    // rolt eraf zonder opgegeten te worden → opruimen
+    s.addEventListener('animationend', () => s.classList.add('hidden'));
+  });
 
   function pop() {
     playPlop();
-    // af en toe rolt er een bitterbal in beeld
-    if (Math.random() < 0.18) showBitterbal();
+    // af en toe rolt er een hapje in beeld
+    if (Math.random() < 0.18) showSnack();
     // willekeurig, alleen als 't vorige glas op is én de 8s cooldown voorbij is
     if (!isDrinking && Date.now() >= cooldownUntil && Math.random() < 0.15) fillBeer();
     count++;
