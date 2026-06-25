@@ -248,7 +248,9 @@
       linear-gradient(180deg, #fff 0%, #fdf6e3 100%);
     background-repeat: no-repeat;
     opacity: .75;
+    display: none;            /* alleen tonen tijdens 't drinken */
   }
+  .beer.filling .foam { display: block; }
   /* clips the bubbles to the current liquid level so the carbonation
      stays inside the beer and sinks along with it */
   .beer-inner {
